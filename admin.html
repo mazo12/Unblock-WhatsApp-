@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة - منصة الإعلانات</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            background: #f5f5f5;
+        }
+
+        /* شاشة تسجيل الدخول */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #666;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        /* لوحة التحكم */
+        .dashboard {
+            display: none;
+        }
+
+        .admin-nav {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-nav h1 {
+            font-size: 1.25rem;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            width: auto;
+            padding: 0.5rem 1rem;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .add-ad-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-btn {
+            background: #27ae60;
+            margin-top: 1rem;
+        }
+
+        .ads-list {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .ad-item {
+            border-bottom: 1px solid #eee;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ad-item:last-child {
+            border-bottom: none;
+        }
+
+        .ad-info h3 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .ad-info p {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            width: auto;
+            padding: 0.5rem 1rem;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginSection" class="login-container">
+        <div class="login-box">
+            <h2>🔐 تسجيل الدخول إلى لوحة الإدارة</h2>
+            <div id="loginError"></div>
+            <div class="input-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="username" placeholder="أدخل اسم المستخدم">
+            </div>
+            <div class="input-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="password" placeholder="أدخل كلمة المرور">
+            </div>
+            <button onclick="login()">دخول</button>
+        </div>
+    </div>
+
+    <div id="dashboardSection" class="dashboard">
+        <div class="admin-nav">
+            <h1>📊 لوحة إدارة الإعلانات</h1>
+            <button onclick="logout()" class="logout-btn">تسجيل خروج</button>
+        </div>
+        <div class="dashboard-container">
+            <div class="add-ad-form">
+                <h2>➕ إضافة إعلان جديد</h2>
+                <div id="formMessage"></div>
+                <div class="form-group">
+                    <label>عنوان الإعلان *</label>
+                    <input type="text" id="adTitle" placeholder="مثال: هاتف iPhone 13 للبيع">
+                </div>
+                <div class="form-group">
+                    <label>وصف الإعلان *</label>
+                    <textarea id="adDescription" placeholder="أدخل وصفاً مفصلاً للإعلان..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>السعر</label>
+                    <input type="text" id="adPrice" placeholder="مثال: 5000 ريال أو قابل للتفاوض">
+                </div>
+                <div class="form-group">
+                    <label>رابط الصورة (اختياري)</label>
+                    <input type="url" id="adImage" placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label>رابط الإعلان (اختياري)</label>
+                    <input type="url" id="adLink" placeholder="https://example.com/product">
+                </div>
+                <button onclick="addAd()" class="submit-btn">➕ إضافة الإعلان</button>
+            </div>
+
+            <div class="ads-list">
+                <h2>📋 قائمة الإعلانات الحالية</h2>
+                <div id="adminAdsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_USER = "admin";
+        const ADMIN_PASS = "admin123";
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+
+            if (username === ADMIN_USER && password === ADMIN_PASS) {
+                localStorage.setItem('adminLoggedIn', 'true');
+                showDashboard();
+                loadAdsForAdmin();
+                errorDiv.innerHTML = '';
+            } else {
+                errorDiv.innerHTML = '<div class="error">❌ اسم المستخدم أو كلمة المرور غير صحيحة</div>';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminLoggedIn');
+            showLogin();
+        }
+
+        function showDashboard() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('dashboardSection').style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('loginSection').style.display = 'flex';
+            document.getElementById('dashboardSection').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        async function addAd() {
+            const title = document.getElementById('adTitle').value.trim();
+            const description = document.getElementById('adDescription').value.trim();
+            const price = document.getElementById('adPrice').value.trim();
+            const image = document.getElementById('adImage').value.trim();
+            const link = document.getElementById('adLink').value.trim();
+
+            if (!title || !description) {
+                showMessage('يرجى ملء العنوان والوصف', 'error');
+                return;
+            }
+
+            const newAd = {
+                id: Date.now(),
+                title,
+                description,
+                price: price || 'سعر غير محدد',
+                image: image || null,
+                link: link || null,
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('/api/ads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newAd)
+                });
+
+                if (response.ok) {
+                    showMessage('تم إضافة الإعلان بنجاح ✅', 'success');
+                    clearForm();
+                    loadAdsForAdmin();
+                }
+            } catch (error) {
+                showMessage('حدث خطأ في إضافة الإعلان', 'error');
+            }
+        }
+
+        async function deleteAd(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الإعلان؟')) {
+                try {
+                    const response = await fetch(`/api/ads/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        showMessage('تم حذف الإعلان بنجاح ✅', 'success');
+                        loadAdsForAdmin();
+                    }
+                } catch (error) {
+                    showMessage('حدث خطأ في حذف الإعلان', 'error');
+                }
+            }
+        }
+
+        async function loadAdsForAdmin() {
+            try {
+                const response = await fetch('/api/ads');
+                const ads = await response.json();
+                
+                const container = document.getElementById('adminAdsList');
+                
+                if (ads.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:#999;">لا توجد إعلانات حالياً</p>';
+                    return;
+                }
+                
+                container.innerHTML = ads.map(ad => `
+                    <div class="ad-item">
+                        <div class="ad-info">
+                            <h3>${escapeHtml(ad.title)}</h3>
+                            <p>${escapeHtml(ad.description.substring(0, 100))}...</p>
+                            <small>💰 ${ad.price} | 📅 ${new Date(ad.createdAt).toLocaleDateString('ar-EG')}</small>
+                        </div>
+                        <button onclick="deleteAd(${ad.id})" class="delete-btn">🗑️ حذف</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('خطأ:', error);
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('adTitle').value = '';
+            document.getElementById('adDescription').value = '';
+            document.getElementById('adPrice').value = '';
+            document.getElementById('adImage').value = '';
+            document.getElementById('adLink').value = '';
+        }
+
+        function showMessage(msg, type) {
+            const messageDiv = document.getElementById('formMessage');
+            messageDiv.innerHTML = `<div class="${type}">${msg}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        if (localStorage.getItem('adminLoggedIn') === 'true') {
+            showDashboard();
+            loadAdsForAdmin();
+        }
+    </script>
+</body>
+</html>
