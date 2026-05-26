@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الإعلانات</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* شريط التنقل */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .admin-link {
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .admin-link:hover {
+            transform: translateY(-2px);
+            background: #764ba2;
+        }
+
+        /* الحاوية الرئيسية */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* بطاقات الإعلانات */
+        .ads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .ad-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .ad-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .ad-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .ad-content {
+            padding: 1.5rem;
+        }
+
+        .ad-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .ad-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .ad-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .ad-date {
+            font-size: 0.875rem;
+            color: #999;
+        }
+
+        .no-ads {
+            text-align: center;
+            padding: 4rem;
+            background: white;
+            border-radius: 15px;
+            color: #666;
+        }
+
+        /* رسالة التحميل */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .ads-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">📢 منصة الإعلانات</div>
+            <a href="admin.html" class="admin-link">لوحة الإدارة</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="adsContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>جاري تحميل الإعلانات...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تحميل وعرض الإعلانات
+        async function loadAds() {
+            try {
+                const response = await fetch('/api/ads');
+                const ads = await response.json();
+                
+                const container = document.getElementById('adsContainer');
+                
+                if (ads.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-ads">
+                            <h2>📭 لا توجد إعلانات حالياً</h2>
+                            <p>سيتم إضافة إعلانات قريباً</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div class="ads-grid">
+                        ${ads.map(ad => `
+                            <div class="ad-card" onclick="window.open('${ad.link || '#'}', '_blank')">
+                                ${ad.image ? `<img src="${ad.image}" alt="${ad.title}" class="ad-image" 
+                                    onerror="this.src='https://via.placeholder.com/400x200?text=صورة+غير+متوفرة'">` : ''}
+                                <div class="ad-content">
+                                    <div class="ad-title">${escapeHtml(ad.title)}</div>
+                                    <div class="ad-description">${escapeHtml(ad.description)}</div>
+                                    <div class="ad-price">${ad.price || 'سعر غير محدد'}</div>
+                                    <div class="ad-date">📅 ${new Date(ad.createdAt).toLocaleDateString('ar-EG')}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('خطأ في تحميل الإعلانات:', error);
+                document.getElementById('adsContainer').innerHTML = `
+                    <div class="no-ads">
+                        <h2>⚠️ حدث خطأ</h2>
+                        <p>لم نتمكن من تحميل الإعلانات. يرجى المحاولة مرة أخرى.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        loadAds();
+        // تحديث الإعلانات كل 30 ثانية
+        setInterval(loadAds, 30000);
+    </script>
+</body>
+</html>
