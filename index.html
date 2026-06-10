@@ -1,3 +1,4 @@
+    
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -25,14 +26,12 @@
       padding-bottom: 30px;
     }
 
-    /* الحاوية الرئيسية */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 15px;
     }
 
-    /* الهيدر */
     .main-header {
       background: linear-gradient(135deg, #0f172a, #1e293b);
       color: white;
@@ -67,7 +66,6 @@
       position: relative;
     }
 
-    /* أقسام الإعلانات */
     .ads-section {
       display: flex;
       flex-wrap: wrap;
@@ -164,7 +162,6 @@
       border-radius: 20px;
     }
 
-    /* زر لوحة التحكم */
     .control-toggle-btn {
       background: #ffffff;
       border: 2px solid #e2e8f0;
@@ -190,11 +187,6 @@
       box-shadow: 0 15px 25px rgba(15,23,42,0.25);
     }
 
-    .control-toggle-btn i {
-      font-size: 1.2rem;
-    }
-
-    /* لوحة التحكم */
     .admin-panel {
       background: white;
       border-radius: 32px;
@@ -203,7 +195,6 @@
       box-shadow: 0 25px 50px rgba(0,0,0,0.12);
       border: 1px solid #e9eef2;
       display: none;
-      transition: all 0.4s ease;
     }
 
     .admin-panel.visible {
@@ -353,20 +344,10 @@
       background: #f1f5f9;
     }
 
-    .list-item-details {
-      font-weight: 600;
-    }
-
     .actions {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-    }
-
-    .actions button {
-      font-size: 0.9rem;
-      padding: 10px 16px;
-      border-radius: 14px;
     }
 
     hr {
@@ -384,40 +365,29 @@
       .main-header h1 {
         font-size: 1.8rem;
       }
-      .list-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- رأس الموقع -->
     <header class="main-header">
       <h1><i class="fas fa-bullhorn" style="margin-left: 10px;"></i> موقعي الأنيق</h1>
       <p>اكتشف أحدث العروض والإعلانات</p>
     </header>
 
-    <!-- منطقة عرض الإعلانات (3 أقسام) -->
-    <section class="ads-section" id="adsContainer">
-      <!-- سيتم ملؤها ديناميكيًا عبر JavaScript -->
-    </section>
+    <section class="ads-section" id="adsContainer"></section>
 
-    <!-- زر إظهار/إخفاء لوحة التحكم -->
     <div style="display: flex; justify-content: center;">
       <button class="control-toggle-btn" id="togglePanelBtn">
         <i class="fas fa-cogs"></i> <span>لوحة التحكم</span>
       </button>
     </div>
 
-    <!-- لوحة التحكم (مخفية افتراضيًا) -->
     <div class="admin-panel" id="adminPanel">
       <div class="panel-title">
         <i class="fas fa-sliders-h"></i> إدارة الإعلانات
       </div>
 
-      <!-- نموذج إضافة/تعديل إعلان -->
       <div class="ad-form">
         <h3 style="margin-bottom: 15px; font-weight: 700;" id="formTitle">➕ إضافة إعلان جديد</h3>
         
@@ -449,18 +419,15 @@
           <input type="text" id="adTitle" placeholder="مثلاً: عرض خاص">
         </div>
 
-        <input type="hidden" id="editIndex" value="-1"> <!-- -1 يعني إضافة جديد -->
+        <input type="hidden" id="editIndex" value="-1">
 
         <button class="btn" id="saveAdBtn"><i class="fas fa-save"></i> حفظ الإعلان</button>
         <button class="btn btn-secondary" id="cancelEditBtn" style="margin-top: 10px; display: none;"><i class="fas fa-times"></i> إلغاء التعديل</button>
       </div>
 
-      <!-- قائمة الإعلانات الحالية -->
       <div>
         <h3 style="margin: 20px 0 15px;"><i class="fas fa-list-ul"></i> الإعلانات المخزنة</h3>
-        <div class="ads-list" id="savedAdsList">
-          <!-- تُعرض هنا -->
-        </div>
+        <div class="ads-list" id="savedAdsList"></div>
       </div>
       
       <hr>
@@ -473,65 +440,78 @@
 
   <script>
     (function() {
-      // ---------- التخزين المحلي ----------
-      const STORAGE_KEY = 'my_site_ads_data';
+      // مفتاح التخزين المحلي
+      const STORAGE_KEY = 'my_site_ads_data_v2';
       
-      // الهيكل الافتراضي: 3 خانات، كل خانة كائن { image, link, title }
+      // الهيكل الافتراضي للإعلانات
       const DEFAULT_ADS = [
         { image: '', link: '', title: '' },
         { image: '', link: '', title: '' },
         { image: '', link: '', title: '' }
       ];
 
-      // تحميل البيانات من localStorage
+      // تحميل البيانات بأمان
       function loadAds() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          try {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
             const parsed = JSON.parse(stored);
             if (Array.isArray(parsed) && parsed.length === 3) {
-              return parsed;
+              // التأكد من أن كل عنصر يحتوي على الخصائص المطلوبة
+              return parsed.map((item, index) => ({
+                image: typeof item.image === 'string' ? item.image : (DEFAULT_ADS[index]?.image || ''),
+                link: typeof item.link === 'string' ? item.link : (DEFAULT_ADS[index]?.link || ''),
+                title: typeof item.title === 'string' ? item.title : (DEFAULT_ADS[index]?.title || '')
+              }));
             }
-          } catch (e) {}
+          }
+        } catch (e) {
+          console.warn('تعذر تحميل الإعلانات، استخدام الافتراضي');
         }
-        return DEFAULT_ADS.map(ad => ({...ad})); // نسخة جديدة
+        return DEFAULT_ADS.map(ad => ({...ad}));
       }
 
       // حفظ البيانات
       function saveAds(adsArray) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(adsArray));
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(adsArray));
+        } catch (e) {
+          alert('فشل في حفظ البيانات، ربما المتصفح لا يدعم التخزين المحلي.');
+        }
       }
 
-      // الحالة الحالية
       let ads = loadAds();
 
-      // ---------- عناصر DOM ----------
-      const adsContainer = document.getElementById('adsContainer');
-      const adminPanel = document.getElementById('adminPanel');
-      const togglePanelBtn = document.getElementById('togglePanelBtn');
-      const adSlotSelect = document.getElementById('adSlotSelect');
-      const imageUrlInput = document.getElementById('imageUrl');
-      const targetUrlInput = document.getElementById('targetUrl');
-      const adTitleInput = document.getElementById('adTitle');
-      const saveAdBtn = document.getElementById('saveAdBtn');
-      const cancelEditBtn = document.getElementById('cancelEditBtn');
-      const editIndexInput = document.getElementById('editIndex');
-      const imagePreview = document.getElementById('imagePreview');
-      const previewPlaceholder = document.getElementById('previewPlaceholder');
-      const savedAdsList = document.getElementById('savedAdsList');
-      const formTitle = document.getElementById('formTitle');
-      const resetAllBtn = document.getElementById('resetAllBtn');
+      // عناصر DOM مع التحقق من وجودها
+      const getElement = (id) => document.getElementById(id);
+      
+      const adsContainer = getElement('adsContainer');
+      const adminPanel = getElement('adminPanel');
+      const togglePanelBtn = getElement('togglePanelBtn');
+      const adSlotSelect = getElement('adSlotSelect');
+      const imageUrlInput = getElement('imageUrl');
+      const targetUrlInput = getElement('targetUrl');
+      const adTitleInput = getElement('adTitle');
+      const saveAdBtn = getElement('saveAdBtn');
+      const cancelEditBtn = getElement('cancelEditBtn');
+      const editIndexInput = getElement('editIndex');
+      const imagePreview = getElement('imagePreview');
+      const previewPlaceholder = getElement('previewPlaceholder');
+      const savedAdsList = getElement('savedAdsList');
+      const formTitle = getElement('formTitle');
+      const resetAllBtn = getElement('resetAllBtn');
 
-      // ---------- دوال العرض ----------
+      // دوال العرض الآمنة
       function renderAds() {
         if (!adsContainer) return;
         adsContainer.innerHTML = '';
 
-        ads.forEach((ad, index) => {
+        ads.forEach((ad) => {
+          if (!ad) return; // حماية إضافية
+          
           const card = document.createElement('div');
           card.className = 'ad-card';
 
-          // حاوية الصورة
           const imgContainer = document.createElement('div');
           imgContainer.className = 'ad-image-container';
 
@@ -540,12 +520,15 @@
             link.href = ad.link && ad.link.trim() !== '' ? ad.link : '#';
             link.target = '_blank';
             link.rel = 'noopener noreferrer';
+            
             const img = document.createElement('img');
             img.src = ad.image;
             img.alt = ad.title || 'إعلان';
             img.onerror = function() {
-              // في حال فشل تحميل الصورة، نعرض أيقونة
               img.style.display = 'none';
+              // تنظيف الأيقونة القديمة إذا وجدت
+              const existingIcon = imgContainer.querySelector('.placeholder-icon');
+              if (existingIcon) existingIcon.remove();
               const fallback = document.createElement('i');
               fallback.className = 'fas fa-image placeholder-icon';
               imgContainer.appendChild(fallback);
@@ -553,13 +536,11 @@
             link.appendChild(img);
             imgContainer.appendChild(link);
           } else {
-            // لا توجد صورة: أيقونة
             const icon = document.createElement('i');
             icon.className = 'fas fa-ad placeholder-icon';
             imgContainer.appendChild(icon);
           }
 
-          // معلومات الإعلان
           const infoDiv = document.createElement('div');
           infoDiv.className = 'ad-info';
           
@@ -577,15 +558,14 @@
 
           infoDiv.appendChild(titleEl);
           infoDiv.appendChild(linkHint);
-          
           card.appendChild(imgContainer);
           card.appendChild(infoDiv);
           adsContainer.appendChild(card);
         });
       }
 
-      // تحديث معاينة الصورة
       function updateImagePreview() {
+        if (!imagePreview || !previewPlaceholder || !imageUrlInput) return;
         const url = imageUrlInput.value.trim();
         if (url) {
           imagePreview.src = url;
@@ -598,53 +578,54 @@
         }
       }
 
-      // إعادة تعيين النموذج
       function resetForm() {
-        imageUrlInput.value = '';
-        targetUrlInput.value = '';
-        adTitleInput.value = '';
-        editIndexInput.value = '-1';
-        adSlotSelect.value = '0';
+        if (imageUrlInput) imageUrlInput.value = '';
+        if (targetUrlInput) targetUrlInput.value = '';
+        if (adTitleInput) adTitleInput.value = '';
+        if (editIndexInput) editIndexInput.value = '-1';
+        if (adSlotSelect) adSlotSelect.value = '0';
         updateImagePreview();
-        formTitle.innerHTML = '➕ إضافة إعلان جديد';
-        cancelEditBtn.style.display = 'none';
+        if (formTitle) formTitle.innerHTML = '➕ إضافة إعلان جديد';
+        if (cancelEditBtn) cancelEditBtn.style.display = 'none';
       }
 
-      // ملء النموذج للتعديل
       function populateFormForEdit(index) {
-        const ad = ads[index];
-        if (!ad) return;
-        adSlotSelect.value = index;
-        imageUrlInput.value = ad.image || '';
-        targetUrlInput.value = ad.link || '';
-        adTitleInput.value = ad.title || '';
-        editIndexInput.value = index;
+        if (!ads[index]) return;
+        if (adSlotSelect) adSlotSelect.value = index;
+        if (imageUrlInput) imageUrlInput.value = ads[index].image || '';
+        if (targetUrlInput) targetUrlInput.value = ads[index].link || '';
+        if (adTitleInput) adTitleInput.value = ads[index].title || '';
+        if (editIndexInput) editIndexInput.value = index;
         updateImagePreview();
-        formTitle.innerHTML = `✏️ تعديل إعلان الخانة ${parseInt(index)+1}`;
-        cancelEditBtn.style.display = 'inline-flex';
+        if (formTitle) formTitle.innerHTML = `✏️ تعديل إعلان الخانة ${parseInt(index)+1}`;
+        if (cancelEditBtn) cancelEditBtn.style.display = 'inline-flex';
         
-        // التمرير إلى النموذج
-        document.querySelector('.ad-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const formElement = document.querySelector('.ad-form');
+        if (formElement) {
+          formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
 
-      // عرض قائمة الإعلانات المحفوظة في لوحة التحكم
       function renderSavedAdsList() {
         if (!savedAdsList) return;
         savedAdsList.innerHTML = '';
 
         ads.forEach((ad, idx) => {
+          if (!ad) return;
+          
           const item = document.createElement('div');
           item.className = 'list-item';
           
           const infoWrap = document.createElement('div');
           infoWrap.className = 'list-item-info';
           
-          // صورة مصغرة
           if (ad.image && ad.image.trim() !== '') {
             const thumb = document.createElement('img');
             thumb.src = ad.image;
             thumb.alt = 'صورة';
-            thumb.onerror = () => { thumb.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="%23cbd5e1" viewBox="0 0 24 24"%3E%3Cpath d="M4 4h16v16H4z"/%3E%3C/svg%3E'; };
+            thumb.onerror = () => { 
+              thumb.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="%23cbd5e1" viewBox="0 0 24 24"%3E%3Cpath d="M4 4h16v16H4z"/%3E%3C/svg%3E'; 
+            };
             infoWrap.appendChild(thumb);
           } else {
             const placeholderIcon = document.createElement('i');
@@ -682,7 +663,6 @@
           
           actionsDiv.appendChild(editBtn);
           actionsDiv.appendChild(deleteBtn);
-          
           item.appendChild(infoWrap);
           item.appendChild(actionsDiv);
           savedAdsList.appendChild(item);
@@ -694,7 +674,86 @@
         renderSavedAdsList();
       }
 
-      // حفظ الإعلان (إضافة أو تعديل)
       function saveCurrentAd() {
+        if (!adSlotSelect || !imageUrlInput || !targetUrlInput || !adTitleInput || !editIndexInput) return;
+        
         const slotIndex = parseInt(adSlotSelect.value, 10);
-    
+        if (isNaN(slotIndex) || slotIndex < 0 || slotIndex > 2) {
+          alert('الرجاء اختيار خانة صحيحة.');
+          return;
+        }
+
+        const image = imageUrlInput.value.trim();
+        const link = targetUrlInput.value.trim();
+        const title = adTitleInput.value.trim();
+
+        if (!image) {
+          alert('يرجى إدخال رابط الصورة على الأقل.');
+          return;
+        }
+
+        const editIdx = editIndexInput.value;
+        const targetIndex = (editIdx !== '-1' && !isNaN(parseInt(editIdx))) ? parseInt(editIdx) : slotIndex;
+
+        if (targetIndex < 0 || targetIndex > 2) {
+          alert('خطأ في تحديد الخانة.');
+          return;
+        }
+
+        ads[targetIndex] = { image, link, title };
+        saveAds(ads);
+        renderAll();
+        resetForm();
+        
+        if (adminPanel && !adminPanel.classList.contains('visible')) {
+          adminPanel.classList.add('visible');
+        }
+      }
+
+      function resetAllAds() {
+        if (confirm('هل أنت متأكد من حذف جميع الإعلانات؟ لا يمكن التراجع.')) {
+          ads = DEFAULT_ADS.map(ad => ({...ad}));
+          saveAds(ads);
+          renderAll();
+          resetForm();
+        }
+      }
+
+      function togglePanel() {
+        if (adminPanel) {
+          adminPanel.classList.toggle('visible');
+        }
+      }
+
+      // ربط الأحداث بأمان
+      if (imageUrlInput) {
+        imageUrlInput.addEventListener('input', updateImagePreview);
+      }
+      
+      if (saveAdBtn) {
+        saveAdBtn.addEventListener('click', saveCurrentAd);
+      }
+      
+      if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', resetForm);
+      }
+
+      if (resetAllBtn) {
+        resetAllBtn.addEventListener('click', resetAllAds);
+      }
+      
+      if (togglePanelBtn) {
+        togglePanelBtn.addEventListener('click', togglePanel);
+      }
+
+      // بدء التشغيل
+      renderAll();
+      updateImagePreview();
+      
+      if (adminPanel) {
+        adminPanel.classList.remove('visible');
+      }
+    })();
+  </script>
+</body>
+</html>
